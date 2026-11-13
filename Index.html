@@ -1,436 +1,356 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Guide Docker Compose</title>
+  <meta name="description" content="Cheat sheet complet Docker Compose : commandes, options, exemples Django, PostgreSQL, Redis et Next.js.">
+  <title>Docker Compose — Guide complet</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    code, pre { font-family: 'JetBrains Mono', monospace; }
-    html { scroll-behavior: smooth; }
-    .glass {
-      background: rgba(30, 41, 59, .65);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(148,163,184,.13);
-    }
-    .command {
-      background: #080f1e;
-      border: 1px solid #26344c;
-    }
-    .command button { transition: .2s; }
-    .command button:hover { color: #60a5fa; }
-    .gradient-text {
-      background: linear-gradient(90deg,#60a5fa,#a78bfa);
-      -webkit-background-clip: text;
-      color: transparent;
-    }
-    .section-card { scroll-margin-top: 90px; }
+    :root { color-scheme: dark; }
+    * { scroll-behavior: smooth; }
+    body { font-family: "DM Sans", sans-serif; background: #080d19; }
+    code, pre, .mono { font-family: "JetBrains Mono", monospace; }
+    .surface { background: rgba(17, 27, 47, .82); border: 1px solid rgba(148,163,184,.14); }
+    .command-card { background: #0a1222; border: 1px solid #26344d; }
+    .command-card:hover { border-color: rgba(96,165,250,.55); transform: translateY(-2px); }
+    .command-card { transition: border-color .2s, transform .2s; }
+    .gradient { background: linear-gradient(100deg,#60a5fa,#a78bfa 55%,#5eead4); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .nav-link.active { color:#93c5fd; background:rgba(59,130,246,.12); border-color:rgba(59,130,246,.25); }
+    .section-anchor { scroll-margin-top: 100px; }
+    .copy-btn { white-space:nowrap; }
+    .copy-btn.copied { color:#4ade80; }
+    .tag { font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid rgba(148,163,184,.2); color:#94a3b8; }
+    pre { white-space:pre; }
+    ::selection { background:rgba(59,130,246,.35); }
+    @media (min-width: 1024px) { .sidebar { position:sticky; top:96px; align-self:start; } }
   </style>
 </head>
-
-<body class="bg-[#080f1e] text-slate-200">
-
-<!-- NAVIGATION -->
-<header class="sticky top-0 z-50 border-b border-slate-800 bg-[#080f1e]/90 backdrop-blur-xl">
-  <nav class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-    <a href="#" class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
-        <span class="text-xl">🐳</span>
-      </div>
-      <div>
-        <h1 class="font-extrabold text-white">Docker<span class="text-blue-400">Compose</span></h1>
-        <p class="text-xs text-slate-500">Guide pratique</p>
-      </div>
-    </a>
-    <div class="hidden md:flex gap-6 text-sm text-slate-400">
-      <a href="#essentielles" class="hover:text-blue-400">Commandes</a>
-      <a href="#options" class="hover:text-blue-400">Options</a>
-      <a href="#exemple" class="hover:text-blue-400">Exemple YAML</a>
-    </div>
-    <a href="#essentielles" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-semibold text-white">
-      Commencer →
-    </a>
-  </nav>
-</header>
-
-<!-- HERO -->
-<section class="relative overflow-hidden">
-  <div class="absolute w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full -top-20 -left-20"></div>
-  <div class="absolute w-96 h-96 bg-purple-600/20 blur-[120px] rounded-full top-20 right-0"></div>
-
-  <div class="relative max-w-7xl mx-auto px-6 py-20 md:py-28">
-    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-300 text-sm mb-8">
-      <span class="w-2 h-2 rounded-full bg-green-400"></span>
-      Guide technique • Docker 
-    </div>
-
-    <h2 class="text-4xl md:text-6xl font-extrabold text-white leading-tight max-w-4xl">
-      Maîtriser les commandes
-      <span class="gradient-text">Docker Compose</span>
-    </h2>
-
-    <p class="text-slate-400 text-lg mt-6 max-w-2xl leading-relaxed">
-      Apprends à démarrer, arrêter, construire et gérer tes applications
-      multi-conteneurs avec les commandes Docker Compose essentielles.
-    </p>
-
-    <div class="flex flex-wrap gap-4 mt-9">
-      <a href="#essentielles" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl font-semibold">
-        Explorer les commandes →
+<body class="text-slate-200">
+  <header class="sticky top-0 z-50 border-b border-slate-800/90 bg-[#080d19]/90 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
+      <a href="#" class="flex items-center gap-3 shrink-0">
+        <div class="h-10 w-10 rounded-xl bg-blue-600/20 border border-blue-400/20 grid place-items-center text-2xl">🐳</div>
+        <div><div class="font-extrabold text-white">Docker <span class="text-blue-400">Compose</span></div><div class="text-[11px] text-slate-500">Guide pratique & cheat sheet</div></div>
       </a>
-      <a href="#exemple" class="border border-slate-700 hover:border-blue-500 px-6 py-3 rounded-xl font-semibold">
-        Voir le fichier YAML
-      </a>
+      <div class="hidden md:flex items-center gap-5 text-sm text-slate-400">
+        <a class="hover:text-blue-300" href="#commandes">Commandes</a>
+        <a class="hover:text-blue-300" href="#options">Options</a>
+        <a class="hover:text-blue-300" href="#exemples">Exemples</a>
+        <a class="hover:text-blue-300" href="#depannage">Dépannage</a>
+      </div>
+      <a href="#commandes" class="rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 text-sm font-bold text-white">Explorer le guide <span aria-hidden="true">→</span></a>
     </div>
+  </header>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
-      <div class="glass p-5 rounded-2xl">
-        <p class="text-3xl font-extrabold text-blue-400">01</p>
-        <p class="text-sm text-slate-400 mt-2">Démarrage & arrêt</p>
+  <section class="relative overflow-hidden">
+    <div class="absolute -top-32 -left-20 w-96 h-96 bg-blue-600/20 blur-[120px] rounded-full"></div>
+    <div class="absolute top-20 right-0 w-96 h-96 bg-violet-600/15 blur-[130px] rounded-full"></div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-14 md:pt-24 md:pb-20">
+      <div class="inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-400/10 px-3 py-1.5 text-xs font-semibold text-blue-300 mb-6"><span class="h-2 w-2 rounded-full bg-emerald-400"></span> Docker Compose v2 · Référence rapide</div>
+      <h1 class="max-w-4xl text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight text-white">Maîtriser <span class="gradient">Docker Compose</span></h1>
+      <p class="mt-6 max-w-2xl text-slate-400 text-base sm:text-lg leading-relaxed">Toutes les commandes utiles pour construire, démarrer, surveiller et dépanner des applications multi-conteneurs. Avec des exemples concrets pour Django, PostgreSQL, Redis et Next.js.</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="#commandes" class="rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-3 font-bold text-white">Voir les commandes</a>
+        <a href="#exemples" class="rounded-xl border border-slate-700 hover:border-blue-400 px-5 py-3 font-semibold text-slate-200">Exemples pratiques</a>
       </div>
-      <div class="glass p-5 rounded-2xl">
-        <p class="text-3xl font-extrabold text-purple-400">02</p>
-        <p class="text-sm text-slate-400 mt-2">Construction</p>
-      </div>
-      <div class="glass p-5 rounded-2xl">
-        <p class="text-3xl font-extrabold text-cyan-400">03</p>
-        <p class="text-sm text-slate-400 mt-2">Inspection</p>
-      </div>
-      <div class="glass p-5 rounded-2xl">
-        <p class="text-3xl font-extrabold text-green-400">04</p>
-        <p class="text-sm text-slate-400 mt-2">Configuration</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- MAIN -->
-<main id="essentielles" class="max-w-7xl mx-auto px-6 py-16">
-
-  <div class="mb-12">
-    <p class="text-blue-400 uppercase text-xs font-bold tracking-widest">Référence pratique</p>
-    <h2 class="text-3xl font-extrabold text-white mt-3">Les commandes essentielles</h2>
-    <p class="text-slate-400 mt-3">Les commandes les plus utilisées au quotidien pour administrer tes conteneurs.</p>
-  </div>
-
-  <!-- SECTION 1 -->
-  <section class="section-card mb-12">
-    <div class="flex items-center gap-4 mb-6">
-      <div class="w-12 h-12 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center text-xl">🚀</div>
-      <div>
-        <h3 class="text-xl font-bold text-white">1. Démarrage et arrêt des services</h3>
-        <p class="text-sm text-slate-500">Lancer et arrêter ton application</p>
-      </div>
-    </div>
-
-    <div class="grid md:grid-cols-2 gap-5">
-      <div class="glass p-6 rounded-2xl">
-        <h4 class="font-bold text-white mb-2">Démarrer les services</h4>
-        <p class="text-sm text-slate-400 mb-5">Lance tous les services en arrière-plan.</p>
-        <div class="command rounded-xl p-4 flex items-center justify-between gap-3">
-          <code class="text-green-400 text-sm">docker compose up -d</code>
-          <button onclick="copyCode(this)" class="text-slate-400 text-sm shrink-0">Copier</button>
-        </div>
-        <p class="text-xs text-slate-500 mt-3">-d signifie detached (arrière-plan).</p>
-      </div>
-
-      <div class="glass p-6 rounded-2xl">
-        <h4 class="font-bold text-white mb-2">Arrêter les services</h4>
-        <p class="text-sm text-slate-400 mb-5">Arrête et supprime les conteneurs et réseaux du projet.</p>
-        <div class="command rounded-xl p-4 flex items-center justify-between gap-3">
-          <code class="text-red-400 text-sm">docker compose down</code>
-          <button onclick="copyCode(this)" class="text-slate-400 text-sm shrink-0">Copier</button>
-        </div>
-        <p class="text-xs text-slate-500 mt-3">Les volumes ne sont pas supprimés par défaut.</p>
+      <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl">
+        <div class="surface rounded-2xl p-4"><div class="text-2xl font-extrabold text-blue-300">01</div><div class="text-sm text-slate-400 mt-1">Cycle de vie</div></div>
+        <div class="surface rounded-2xl p-4"><div class="text-2xl font-extrabold text-violet-300">02</div><div class="text-sm text-slate-400 mt-1">Images & conteneurs</div></div>
+        <div class="surface rounded-2xl p-4"><div class="text-2xl font-extrabold text-cyan-300">03</div><div class="text-sm text-slate-400 mt-1">Volumes & réseaux</div></div>
+        <div class="surface rounded-2xl p-4"><div class="text-2xl font-extrabold text-emerald-300">04</div><div class="text-sm text-slate-400 mt-1">Debug & pratique</div></div>
       </div>
     </div>
   </section>
 
-  <!-- SECTION 2 -->
-  <section class="section-card mb-12">
-    <div class="flex items-center gap-4 mb-6">
-      <div class="w-12 h-12 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center text-xl">🔨</div>
-      <div>
-        <h3 class="text-xl font-bold text-white">2. Construction des images</h3>
-        <p class="text-sm text-slate-500">Construire ou reconstruire les images Docker</p>
-      </div>
-    </div>
-
-    <div class="grid md:grid-cols-2 gap-5">
-      <div class="glass p-6 rounded-2xl">
-        <h4 class="font-bold text-white mb-2">Construire les images</h4>
-        <p class="text-sm text-slate-400 mb-5">Construit les images définies dans le fichier Compose.</p>
-        <div class="command rounded-xl p-4 flex items-center justify-between gap-3">
-          <code class="text-purple-400 text-sm">docker compose build</code>
-          <button onclick="copyCode(this)" class="text-slate-400 text-sm">Copier</button>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
+    <div class="grid lg:grid-cols-[230px_minmax(0,1fr)] gap-8">
+      <aside class="sidebar hidden lg:block">
+        <div class="surface rounded-2xl p-4">
+          <div class="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">Navigation</div>
+          <nav class="space-y-1 text-sm" id="sideNav">
+            <a class="nav-link block rounded-lg border border-transparent px-3 py-2" href="#bases">Bases & installation</a>
+            <a class="nav-link block rounded-lg border border-transparent px-3 py-2" href="#cycle">Démarrer / arrêter</a>
+            <a class="nav-link block rounded-lg border border-transparent px-3 py-2" href="#build">Build & images</a>
+            <a class="nav-link block rounded-lg border border-transparent px-3 py-2" href="#inspection">Inspection & logs</a>
+            <a class="nav-link block rounded-lg border border-transparent px-3 py-2" href="#execution">Exécution</a>
+            <a class="nav-link block rounded-lg border border-transparent px-3 py-2" href="#volumes">Volumes & réseaux</a>
+            <a class="nav-link block rounded-lg border border-transparent px-3 py-2" href="#configuration">Configuration</a>
+            <a class="nav-link block rounded-lg border border-transparent px-3 py-2" href="#exemples">Exemples pratiques</a>
+            <a class="nav-link block rounded-lg border border-transparent px-3 py-2" href="#depannage">Dépannage</a>
+          </nav>
         </div>
-      </div>
-      <div class="glass p-6 rounded-2xl">
-        <h4 class="font-bold text-white mb-2">Reconstruire sans cache</h4>
-        <p class="text-sm text-slate-400 mb-5">Force une reconstruction sans utiliser le cache de build.</p>
-        <div class="command rounded-xl p-4 flex items-center justify-between gap-3">
-          <code class="text-purple-400 text-sm">docker compose build --no-cache</code>
-          <button onclick="copyCode(this)" class="text-slate-400 text-sm">Copier</button>
+        <div class="mt-4 rounded-2xl border border-amber-400/20 bg-amber-400/5 p-4 text-xs text-slate-400 leading-relaxed">
+          <div class="font-bold text-amber-300 mb-1">À retenir</div>
+          `docker compose down -v` supprime les volumes du projet. Vérifie avant de l'utiliser : des données peuvent être perdues.
         </div>
-      </div>
-    </div>
-  </section>
+      </aside>
 
-  <!-- SECTION 3 -->
-  <section class="section-card mb-12">
-    <div class="flex items-center gap-4 mb-6">
-      <div class="w-12 h-12 rounded-xl bg-cyan-500/15 text-cyan-400 flex items-center justify-center text-xl">🔍</div>
-      <div>
-        <h3 class="text-xl font-bold text-white">3. Gestion et inspection</h3>
-        <p class="text-sm text-slate-500">Surveiller et administrer les conteneurs</p>
-      </div>
-    </div>
-
-    <div class="space-y-4">
-      <div class="glass p-5 rounded-2xl">
-        <h4 class="font-semibold text-white mb-3">Afficher l'état des services</h4>
-        <div class="command rounded-xl p-4 flex justify-between gap-3">
-          <code class="text-cyan-400 text-sm">docker compose ps</code>
-          <button onclick="copyCode(this)" class="text-slate-400 text-sm">Copier</button>
-        </div>
-      </div>
-
-      <div class="glass p-5 rounded-2xl">
-        <h4 class="font-semibold text-white mb-3">Afficher les logs en temps réel</h4>
-        <div class="command rounded-xl p-4 flex justify-between gap-3">
-          <code class="text-cyan-400 text-sm">docker compose logs -f</code>
-          <button onclick="copyCode(this)" class="text-slate-400 text-sm">Copier</button>
-        </div>
-      </div>
-
-      <div class="glass p-5 rounded-2xl">
-        <h4 class="font-semibold text-white mb-3">Exécuter une commande dans un service</h4>
-        <div class="command rounded-xl p-4 flex justify-between gap-3">
-          <code class="text-cyan-400 text-sm">docker compose exec &lt;service&gt; &lt;commande&gt;</code>
-          <button onclick="copyCode(this)" class="text-slate-400 text-sm">Copier</button>
-        </div>
-        <p class="text-xs text-slate-500 mt-3">Exemple : docker compose exec backend python manage.py migrate</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- SECTION 4 -->
-  <section class="section-card mb-12">
-    <div class="flex items-center gap-4 mb-6">
-      <div class="w-12 h-12 rounded-xl bg-green-500/15 text-green-400 flex items-center justify-center text-xl">📈</div>
-      <div>
-        <h3 class="text-xl font-bold text-white">4. Mise à l'échelle</h3>
-        <p class="text-sm text-slate-500">Augmenter le nombre d'instances d'un service</p>
-      </div>
-    </div>
-
-    <div class="glass p-6 rounded-2xl">
-      <p class="text-slate-400 text-sm mb-5">Démarre trois instances du service web.</p>
-      <div class="command rounded-xl p-4 flex justify-between gap-3">
-        <code class="text-green-400 text-sm">docker compose up --scale web=3 -d</code>
-        <button onclick="copyCode(this)" class="text-slate-400 text-sm">Copier</button>
-      </div>
-      <p class="text-xs text-slate-500 mt-4">Attention : le service doit pouvoir fonctionner avec plusieurs instances. Évite de publier directement le même port fixe pour chaque réplique.</p>
-    </div>
-  </section>
-
-  <!-- SECTION 5 -->
-  <section class="section-card mb-12">
-    <div class="flex items-center gap-4 mb-6">
-      <div class="w-12 h-12 rounded-xl bg-orange-500/15 text-orange-400 flex items-center justify-center text-xl">📂</div>
-      <div>
-        <h3 class="text-xl font-bold text-white">5. Plusieurs fichiers Compose</h3>
-        <p class="text-sm text-slate-500">Combiner plusieurs configurations</p>
-      </div>
-    </div>
-
-    <div class="glass p-6 rounded-2xl">
-      <p class="text-slate-400 text-sm mb-5">Spécifie plusieurs fichiers YAML. Ils sont fusionnés dans l'ordre indiqué.</p>
-      <div class="command rounded-xl p-4 flex justify-between gap-3">
-        <code class="text-orange-400 text-sm">docker compose -f compose.yml -f compose.override.yml up</code>
-        <button onclick="copyCode(this)" class="text-slate-400 text-sm">Copier</button>
-      </div>
-      <p class="text-xs text-slate-500 mt-4">Les fichiers suivants peuvent remplacer ou compléter les paramètres précédents.</p>
-    </div>
-  </section>
-
-  <!-- OPTIONS -->
-  <section id="options" class="section-card mb-16">
-    <div class="mb-7">
-      <p class="text-blue-400 uppercase text-xs font-bold tracking-widest">Configuration</p>
-      <h3 class="text-2xl font-extrabold text-white mt-2">6. Options utiles</h3>
-    </div>
-
-    <div class="glass rounded-2xl overflow-hidden">
-      <div class="grid grid-cols-2 bg-slate-800/70 p-4 text-sm font-bold text-white">
-        <span>Option</span><span>Description</span>
-      </div>
-      <div class="divide-y divide-slate-700/60">
-        <div class="grid grid-cols-2 p-4 gap-4 text-sm">
-          <code class="text-blue-400">--env-file</code>
-          <span class="text-slate-400">Définir un fichier de variables d'environnement.</span>
-        </div>
-        <div class="grid grid-cols-2 p-4 gap-4 text-sm">
-          <code class="text-blue-400">-p / --project-name</code>
-          <span class="text-slate-400">Définir le nom du projet Compose.</span>
-        </div>
-        <div class="grid grid-cols-2 p-4 gap-4 text-sm">
-          <code class="text-blue-400">--profile</code>
-          <span class="text-slate-400">Activer un profil spécifique.</span>
-        </div>
-        <div class="grid grid-cols-2 p-4 gap-4 text-sm">
-          <code class="text-blue-400">--progress</code>
-          <span class="text-slate-400">Contrôler l'affichage de la progression : auto, tty, plain, json, quiet.</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- EXEMPLE YAML -->
-  <section id="exemple" class="section-card mb-16">
-    <div class="mb-7">
-      <p class="text-purple-400 uppercase text-xs font-bold tracking-widest">Application pratique</p>
-      <h3 class="text-2xl font-extrabold text-white mt-2">Exemple de fichier compose.yaml</h3>
-      <p class="text-slate-400 mt-3">Un exemple minimal utilisant le serveur web Nginx.</p>
-    </div>
-
-    <div class="rounded-2xl border border-slate-700 overflow-hidden shadow-2xl">
-      <div class="bg-slate-800 px-5 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 bg-red-400 rounded-full"></span>
-          <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
-          <span class="w-3 h-3 bg-green-400 rounded-full"></span>
-          <span class="text-sm text-slate-300 ml-3">compose.yaml</span>
-        </div>
-        <button onclick="copyCode(this)" class="text-sm text-blue-400 hover:text-blue-300">Copier</button>
-      </div>
-      <pre class="bg-[#080f1e] p-6 overflow-x-auto text-sm leading-8"><code class="text-slate-300">services:
-  <span class="text-blue-400">web:</span>
-    <span class="text-purple-400">image:</span> nginx:latest
-    <span class="text-purple-400">ports:</span>
-      - <span class="text-green-400">"8080:80"</span></code></pre>
-    </div>
-
-    <div class="glass rounded-xl p-5 mt-5">
-      <h4 class="font-bold text-white mb-2">Explication</h4>
-      <ul class="text-sm text-slate-400 space-y-2">
-        <li>• <code class="text-blue-400">services</code> : déclare les services de l'application.</li>
-        <li>• <code class="text-blue-400">web</code> : nom du service.</li>
-        <li>• <code class="text-purple-400">image</code> : image Docker utilisée.</li>
-        <li>• <code class="text-purple-400">ports</code> : redirige le port 8080 de l'hôte vers le port 80 du conteneur.</li>
-      </ul>
-      <p class="text-green-400 text-sm mt-4">Accès au serveur : http://localhost:8080</p>
-    </div>
-  </section>
-
-  <!-- WORKFLOW -->
-  <section class="mb-16">
-    <div class="mb-7">
-      <p class="text-green-400 uppercase text-xs font-bold tracking-widest">En pratique</p>
-      <h3 class="text-2xl font-extrabold text-white mt-2">Cycle de travail Docker Compose</h3>
-    </div>
-
-    <div class="glass rounded-2xl p-6 md:p-8">
-      <div class="space-y-5">
-        <div class="flex gap-4 items-center">
-          <span class="w-9 h-9 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">1</span>
-          <div>
-            <p class="text-white font-semibold">Construire les images</p>
-            <code class="text-sm text-blue-400">docker compose build</code>
+      <div class="min-w-0">
+        <div id="bases" class="section-anchor mb-10">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-5">
+            <div><div class="text-xs uppercase tracking-widest text-blue-400 font-bold">Référence complète</div><h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-2">Trouver une commande</h2><p class="text-sm text-slate-400 mt-2">Recherche par nom, option ou description.</p></div>
+            <div class="text-xs text-slate-500">Syntaxe moderne : <code class="text-blue-300">docker compose</code> (avec espace)</div>
           </div>
-        </div>
-        <div class="ml-4 border-l border-slate-700 h-5"></div>
-        <div class="flex gap-4 items-center">
-          <span class="w-9 h-9 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center font-bold">2</span>
-          <div>
-            <p class="text-white font-semibold">Démarrer l'application</p>
-            <code class="text-sm text-green-400">docker compose up -d</code>
+          <div class="relative">
+            <input id="searchInput" type="search" placeholder="Ex. logs, restart, volume, migrate..." class="w-full rounded-2xl border border-slate-700 bg-slate-900/80 px-5 py-4 pl-12 text-white placeholder:text-slate-500 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/10">
+            <svg class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
           </div>
-        </div>
-        <div class="ml-4 border-l border-slate-700 h-5"></div>
-        <div class="flex gap-4 items-center">
-          <span class="w-9 h-9 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">3</span>
-          <div>
-            <p class="text-white font-semibold">Vérifier les conteneurs</p>
-            <code class="text-sm text-cyan-400">docker compose ps</code>
+          <div class="flex flex-wrap gap-2 mt-4" id="filters">
+            <button data-filter="all" class="filter-btn rounded-full bg-blue-600 px-4 py-2 text-xs font-bold text-white">Tout</button>
+            <button data-filter="cycle" class="filter-btn rounded-full border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:border-blue-400">Cycle de vie</button>
+            <button data-filter="build" class="filter-btn rounded-full border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:border-blue-400">Build & images</button>
+            <button data-filter="inspect" class="filter-btn rounded-full border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:border-blue-400">Inspection</button>
+            <button data-filter="exec" class="filter-btn rounded-full border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:border-blue-400">Exécution</button>
+            <button data-filter="config" class="filter-btn rounded-full border border-slate-700 px-4 py-2 text-xs text-slate-300 hover:border-blue-400">Configuration</button>
           </div>
+          <p id="resultCount" class="text-xs text-slate-500 mt-3" aria-live="polite"></p>
         </div>
-        <div class="ml-4 border-l border-slate-700 h-5"></div>
-        <div class="flex gap-4 items-center">
-          <span class="w-9 h-9 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">4</span>
-          <div>
-            <p class="text-white font-semibold">Consulter les journaux</p>
-            <code class="text-sm text-purple-400">docker compose logs -f</code>
+
+        <section id="cycle" class="section-anchor mb-11">
+          <div class="mb-5"><div class="text-xs uppercase tracking-widest text-blue-400 font-bold">01 · Cycle de vie</div><h2 class="text-2xl font-extrabold text-white mt-1">Démarrer, arrêter et recréer</h2></div>
+          <div class="command-grid grid md:grid-cols-2 gap-4">
+            <article class="command-card rounded-2xl p-5" data-category="cycle" data-search="up démarrer lancer services arrière plan detached"><div class="flex justify-between gap-3"><h3 class="font-bold text-white">Démarrer les services</h3><span class="tag">Essentiel</span></div><p class="text-sm text-slate-400 mt-2">Crée et démarre les services. `-d` exécute en arrière-plan.</p><div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-emerald-300">docker compose up -d</code><button class="copy-btn text-xs text-slate-400 hover:text-blue-300" data-copy="docker compose up -d">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="cycle" data-search="down arrêter supprimer conteneurs réseaux"><h3 class="font-bold text-white">Arrêter et supprimer le projet</h3><p class="text-sm text-slate-400 mt-2">Arrête les conteneurs et supprime les conteneurs et réseaux créés par Compose.</p><div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-rose-300">docker compose down</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose down">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="cycle" data-search="start démarrer conteneurs existants arrêtés"><h3 class="font-bold text-white">Redémarrer des services arrêtés</h3><p class="text-sm text-slate-400 mt-2">Démarre des conteneurs déjà créés, sans les recréer.</p><div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-emerald-300">docker compose start</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose start">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="cycle" data-search="stop arrêter sans supprimer conteneurs"><h3 class="font-bold text-white">Arrêter sans supprimer</h3><p class="text-sm text-slate-400 mt-2">Arrête les conteneurs. Ils pourront être relancés avec `start`.</p><div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-amber-300">docker compose stop</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose stop">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="cycle" data-search="restart redémarrer services"><h3 class="font-bold text-white">Redémarrer les services</h3><p class="text-sm text-slate-400 mt-2">Redémarre les conteneurs sélectionnés ou tous les services.</p><div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose restart</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose restart">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="cycle" data-search="force recreate recréer conteneurs"><h3 class="font-bold text-white">Forcer la recréation</h3><p class="text-sm text-slate-400 mt-2">Recrée les conteneurs même si Compose estime qu'ils n'ont pas changé.</p><div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose up -d --force-recreate</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose up -d --force-recreate">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="cycle" data-search="scale mise échelle replicas instances web"><h3 class="font-bold text-white">Mettre à l'échelle un service</h3><p class="text-sm text-slate-400 mt-2">Lance trois réplicas du service `web`. Attention aux ports fixes publiés.</p><div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-violet-300">docker compose up -d --scale web=3</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose up -d --scale web=3">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="cycle" data-search="down volumes supprimer données attention"><h3 class="font-bold text-white">Supprimer aussi les volumes</h3><p class="text-sm text-rose-300 mt-2">Supprime les volumes déclarés et anonymes attachés. Risque de perte de données.</p><div class="mt-4 flex items-center justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-rose-300">docker compose down -v</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose down -v">Copier</button></div></article>
           </div>
-        </div>
-        <div class="ml-4 border-l border-slate-700 h-5"></div>
-        <div class="flex gap-4 items-center">
-          <span class="w-9 h-9 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center font-bold">5</span>
-          <div>
-            <p class="text-white font-semibold">Arrêter l'application</p>
-            <code class="text-sm text-red-400">docker compose down</code>
+        </section>
+
+        <section id="build" class="section-anchor mb-11">
+          <div class="mb-5"><div class="text-xs uppercase tracking-widest text-violet-400 font-bold">02 · Build & images</div><h2 class="text-2xl font-extrabold text-white mt-1">Construire et télécharger les images</h2></div>
+          <div class="command-grid grid md:grid-cols-2 gap-4">
+            <article class="command-card rounded-2xl p-5" data-category="build" data-search="build construire images"><h3 class="font-bold text-white">Construire les images</h3><p class="text-sm text-slate-400 mt-2">Construit les images définies par les instructions `build` du fichier Compose.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-violet-300">docker compose build</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose build">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="build" data-search="no cache reconstruire sans cache"><h3 class="font-bold text-white">Construire sans cache</h3><p class="text-sm text-slate-400 mt-2">Ignore le cache de construction des couches.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-violet-300">docker compose build --no-cache</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose build --no-cache">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="build" data-search="up build construire démarrer"><h3 class="font-bold text-white">Construire puis démarrer</h3><p class="text-sm text-slate-400 mt-2">Construit les images avant de lancer les services.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-violet-300">docker compose up -d --build</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose up -d --build">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="build" data-search="pull télécharger récupérer images registre"><h3 class="font-bold text-white">Télécharger les images</h3><p class="text-sm text-slate-400 mt-2">Récupère les images référencées dans le fichier Compose depuis leur registre.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-violet-300">docker compose pull</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose pull">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="build" data-search="push publier envoyer images registre"><h3 class="font-bold text-white">Envoyer les images</h3><p class="text-sm text-slate-400 mt-2">Publie les images configurées vers leur registre. Authentification requise si privé.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-violet-300">docker compose push</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose push">Copier</button></div></article>
           </div>
-        </div>
+        </section>
+
+        <section id="inspection" class="section-anchor mb-11">
+          <div class="mb-5"><div class="text-xs uppercase tracking-widest text-cyan-400 font-bold">03 · Inspection</div><h2 class="text-2xl font-extrabold text-white mt-1">État, logs et ressources</h2></div>
+          <div class="command-grid grid md:grid-cols-2 gap-4">
+            <article class="command-card rounded-2xl p-5" data-category="inspect" data-search="ps état services conteneurs"><h3 class="font-bold text-white">État des services</h3><p class="text-sm text-slate-400 mt-2">Liste les conteneurs du projet et leur état.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose ps</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose ps">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="inspect" data-search="logs journal temps réel suivre follow"><h3 class="font-bold text-white">Suivre tous les logs</h3><p class="text-sm text-slate-400 mt-2">Affiche les journaux et continue de les suivre en temps réel.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose logs -f</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose logs -f">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="inspect" data-search="logs service backend journal spécifique"><h3 class="font-bold text-white">Logs d'un service</h3><p class="text-sm text-slate-400 mt-2">Affiche uniquement les journaux du service `backend`.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose logs -f backend</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose logs -f backend">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="inspect" data-search="top processus conteneur"><h3 class="font-bold text-white">Processus dans les services</h3><p class="text-sm text-slate-400 mt-2">Affiche les processus en cours dans les conteneurs.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose top</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose top">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="inspect" data-search="images liste images utilisées"><h3 class="font-bold text-white">Images utilisées</h3><p class="text-sm text-slate-400 mt-2">Liste les images utilisées par les conteneurs du projet.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose images</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose images">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="inspect" data-search="stats statistiques cpu mémoire consommation"><h3 class="font-bold text-white">Statistiques des conteneurs</h3><p class="text-sm text-slate-400 mt-2">Affiche CPU, mémoire et autres statistiques d'utilisation.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose stats</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose stats">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="inspect" data-search="config vérifier valider yaml configuration"><h3 class="font-bold text-white">Valider la configuration</h3><p class="text-sm text-slate-400 mt-2">Résout et affiche la configuration Compose finale.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose config</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose config">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="inspect" data-search="port port publié service web"><h3 class="font-bold text-white">Voir le port publié</h3><p class="text-sm text-slate-400 mt-2">Affiche le port hôte associé au port du service.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-cyan-300">docker compose port web 80</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose port web 80">Copier</button></div></article>
+          </div>
+        </section>
+
+        <section id="execution" class="section-anchor mb-11">
+          <div class="mb-5"><div class="text-xs uppercase tracking-widest text-emerald-400 font-bold">04 · Exécution</div><h2 class="text-2xl font-extrabold text-white mt-1">Exécuter des commandes dans les services</h2></div>
+          <div class="command-grid grid md:grid-cols-2 gap-4">
+            <article class="command-card rounded-2xl p-5" data-category="exec" data-search="exec commande conteneur existant terminal shell"><h3 class="font-bold text-white">Exécuter dans un conteneur actif</h3><p class="text-sm text-slate-400 mt-2">Lance une commande dans un conteneur déjà démarré.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-emerald-300">docker compose exec backend sh</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose exec backend sh">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="exec" data-search="run nouveau conteneur commande ponctuelle migration"><h3 class="font-bold text-white">Créer un conteneur ponctuel</h3><p class="text-sm text-slate-400 mt-2">Lance une commande dans un nouveau conteneur basé sur le service.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-emerald-300">docker compose run --rm backend sh</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose run --rm backend sh">Copier</button></div></article>
+            <article class="command-card rounded-2xl p-5" data-category="exec" data-search="rm supprimer conteneurs arrêtés force"><h3 class="font-bold text-white">Supprimer les conteneurs arrêtés</h3><p class="text-sm text-slate-400 mt-2">Supprime les conteneurs de service arrêtés. `-f` évite la confirmation.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-emerald-300">docker compose rm -f</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose rm -f">Copier</button></div></article>
+          </div>
+        </section>
+
+        <section id="volumes" class="section-anchor mb-11">
+          <div class="mb-5"><div class="text-xs uppercase tracking-widest text-orange-300 font-bold">05 · Stockage & réseau</div><h2 class="text-2xl font-extrabold text-white mt-1">Volumes et réseaux</h2></div>
+          <div class="surface rounded-2xl p-5 sm:p-6">
+            <p class="text-sm text-slate-400 mb-4">Compose crée et gère automatiquement les volumes et réseaux déclarés dans le fichier YAML. Les commandes de gestion globale des volumes et réseaux sont généralement des commandes Docker CLI.</p>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="rounded-xl bg-slate-950 p-4"><div class="font-bold text-white text-sm">Lister les volumes</div><code class="block text-sm text-orange-300 mt-3">docker volume ls</code><button class="copy-btn text-xs text-slate-500 mt-2" data-copy="docker volume ls">Copier</button></div>
+              <div class="rounded-xl bg-slate-950 p-4"><div class="font-bold text-white text-sm">Inspecter un volume</div><code class="block text-sm text-orange-300 mt-3">docker volume inspect NOM</code><button class="copy-btn text-xs text-slate-500 mt-2" data-copy="docker volume inspect NOM">Copier</button></div>
+              <div class="rounded-xl bg-slate-950 p-4"><div class="font-bold text-white text-sm">Lister les réseaux</div><code class="block text-sm text-orange-300 mt-3">docker network ls</code><button class="copy-btn text-xs text-slate-500 mt-2" data-copy="docker network ls">Copier</button></div>
+              <div class="rounded-xl bg-slate-950 p-4"><div class="font-bold text-white text-sm">Inspecter un réseau</div><code class="block text-sm text-orange-300 mt-3">docker network inspect NOM</code><button class="copy-btn text-xs text-slate-500 mt-2" data-copy="docker network inspect NOM">Copier</button></div>
+            </div>
+            <div class="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/5 p-4 text-sm text-slate-300"><strong class="text-rose-300">Attention aux données :</strong> `docker compose down -v` peut effacer les données stockées dans les volumes du projet, par exemple une base PostgreSQL. N'utilise cette option que si tu souhaites réellement supprimer ces données.</div>
+          </div>
+        </section>
+
+        <section id="configuration" class="section-anchor mb-11">
+          <div class="mb-5"><div class="text-xs uppercase tracking-widest text-fuchsia-300 font-bold">06 · Configuration</div><h2 class="text-2xl font-extrabold text-white mt-1">Options globales utiles</h2></div>
+          <div class="surface rounded-2xl overflow-hidden">
+            <div class="grid grid-cols-[minmax(130px,.8fr)_1.5fr] gap-4 bg-slate-800/70 p-4 text-xs uppercase tracking-wider font-bold text-slate-300"><div>Option</div><div>Utilité</div></div>
+            <div class="divide-y divide-slate-800 text-sm">
+              <div class="grid grid-cols-[minmax(130px,.8fr)_1.5fr] gap-4 p-4"><code class="text-blue-300">-f, --file</code><span class="text-slate-400">Indiquer un ou plusieurs fichiers Compose.</span></div>
+              <div class="grid grid-cols-[minmax(130px,.8fr)_1.5fr] gap-4 p-4"><code class="text-blue-300">-p, --project-name</code><span class="text-slate-400">Définir le nom du projet Compose.</span></div>
+              <div class="grid grid-cols-[minmax(130px,.8fr)_1.5fr] gap-4 p-4"><code class="text-blue-300">--env-file</code><span class="text-slate-400">Charger des variables depuis un fichier d'environnement.</span></div>
+              <div class="grid grid-cols-[minmax(130px,.8fr)_1.5fr] gap-4 p-4"><code class="text-blue-300">--profile</code><span class="text-slate-400">Activer un ou plusieurs profils de services.</span></div>
+              <div class="grid grid-cols-[minmax(130px,.8fr)_1.5fr] gap-4 p-4"><code class="text-blue-300">--project-directory</code><span class="text-slate-400">Définir le répertoire de base du projet.</span></div>
+              <div class="grid grid-cols-[minmax(130px,.8fr)_1.5fr] gap-4 p-4"><code class="text-blue-300">--progress</code><span class="text-slate-400">Choisir le format de progression, selon la commande et la version : auto, tty, plain, json ou quiet.</span></div>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4 mt-4">
+            <div class="command-card rounded-2xl p-5"><h3 class="font-bold text-white">Utiliser plusieurs fichiers</h3><p class="text-sm text-slate-400 mt-2">Les fichiers sont fusionnés dans l'ordre ; les suivants complètent ou remplacent les paramètres précédents.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-xs sm:text-sm text-fuchsia-300">docker compose -f compose.yml -f compose.override.yml up -d</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose -f compose.yml -f compose.override.yml up -d">Copier</button></div></div>
+            <div class="command-card rounded-2xl p-5"><h3 class="font-bold text-white">Activer un profil</h3><p class="text-sm text-slate-400 mt-2">Démarre aussi les services appartenant au profil `debug`.</p><div class="mt-4 flex justify-between gap-3 rounded-xl bg-slate-950 px-3 py-3"><code class="text-sm text-fuchsia-300">docker compose --profile debug up -d</code><button class="copy-btn text-xs text-slate-400" data-copy="docker compose --profile debug up -d">Copier</button></div></div>
+          </div>
+        </section>
+
+        <section id="exemples" class="section-anchor mb-11">
+          <div class="mb-5"><div class="text-xs uppercase tracking-widest text-emerald-300 font-bold">07 · Application pratique</div><h2 class="text-2xl font-extrabold text-white mt-1">Exemples Django, PostgreSQL & Next.js</h2><p class="text-sm text-slate-400 mt-2">Remplace les noms de services par ceux qui existent dans ton propre fichier Compose.</p></div>
+          <div class="space-y-4">
+            <div class="surface rounded-2xl overflow-hidden">
+              <div class="flex items-center justify-between gap-3 border-b border-slate-800 px-5 py-4"><div><h3 class="font-bold text-white">Django / backend</h3><p class="text-xs text-slate-500 mt-1">Migrations, administration et shell</p></div><span class="tag">Backend</span></div>
+              <div class="p-5 grid md:grid-cols-2 gap-3">
+                <div class="rounded-xl bg-slate-950 p-3"><code class="text-xs text-emerald-300">docker compose exec backend python manage.py migrate</code><button class="copy-btn block text-xs text-slate-500 mt-2" data-copy="docker compose exec backend python manage.py migrate">Copier</button></div>
+                <div class="rounded-xl bg-slate-950 p-3"><code class="text-xs text-emerald-300">docker compose exec backend python manage.py createsuperuser</code><button class="copy-btn block text-xs text-slate-500 mt-2" data-copy="docker compose exec backend python manage.py createsuperuser">Copier</button></div>
+                <div class="rounded-xl bg-slate-950 p-3"><code class="text-xs text-emerald-300">docker compose exec backend python manage.py shell</code><button class="copy-btn block text-xs text-slate-500 mt-2" data-copy="docker compose exec backend python manage.py shell">Copier</button></div>
+                <div class="rounded-xl bg-slate-950 p-3"><code class="text-xs text-emerald-300">docker compose exec backend sh</code><button class="copy-btn block text-xs text-slate-500 mt-2" data-copy="docker compose exec backend sh">Copier</button></div>
+              </div>
+            </div>
+            <div class="surface rounded-2xl overflow-hidden">
+              <div class="flex items-center justify-between gap-3 border-b border-slate-800 px-5 py-4"><div><h3 class="font-bold text-white">PostgreSQL / base de données</h3><p class="text-xs text-slate-500 mt-1">Connexion et inspection</p></div><span class="tag">Database</span></div>
+              <div class="p-5 grid md:grid-cols-2 gap-3">
+                <div class="rounded-xl bg-slate-950 p-3"><code class="text-xs text-cyan-300">docker compose exec db psql -U postgres</code><button class="copy-btn block text-xs text-slate-500 mt-2" data-copy="docker compose exec db psql -U postgres">Copier</button></div>
+                <div class="rounded-xl bg-slate-950 p-3"><code class="text-xs text-cyan-300">docker compose logs -f db</code><button class="copy-btn block text-xs text-slate-500 mt-2" data-copy="docker compose logs -f db">Copier</button></div>
+              </div>
+              <p class="px-5 pb-5 text-xs text-slate-500">Dans l'exemple, `db` est le nom du service et `postgres` le rôle SQL. Adapte-les à ton fichier YAML et à tes variables d'environnement.</p>
+            </div>
+            <div class="surface rounded-2xl overflow-hidden">
+              <div class="flex items-center justify-between gap-3 border-b border-slate-800 px-5 py-4"><div><h3 class="font-bold text-white">Next.js / frontend</h3><p class="text-xs text-slate-500 mt-1">Journaux et terminal</p></div><span class="tag">Frontend</span></div>
+              <div class="p-5 grid md:grid-cols-2 gap-3">
+                <div class="rounded-xl bg-slate-950 p-3"><code class="text-xs text-violet-300">docker compose logs -f frontend</code><button class="copy-btn block text-xs text-slate-500 mt-2" data-copy="docker compose logs -f frontend">Copier</button></div>
+                <div class="rounded-xl bg-slate-950 p-3"><code class="text-xs text-violet-300">docker compose exec frontend sh</code><button class="copy-btn block text-xs text-slate-500 mt-2" data-copy="docker compose exec frontend sh">Copier</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <h3 class="font-bold text-white mb-3">Exemple minimal de fichier compose.yaml</h3>
+            <div class="rounded-2xl border border-slate-700 overflow-hidden">
+              <div class="flex justify-between items-center bg-slate-800 px-4 py-3"><span class="text-sm text-slate-300">compose.yaml</span><button class="copy-btn text-xs text-blue-300" data-copy='services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:80"'>Copier le YAML</button></div>
+              <pre class="bg-[#060b14] p-5 overflow-x-auto text-sm leading-7"><code class="text-slate-300">services:
+  <span class="text-blue-300">web:</span>
+    <span class="text-violet-300">image:</span> nginx:latest
+    <span class="text-violet-300">ports:</span>
+      - <span class="text-emerald-300">"8080:80"</span></code></pre>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">Enregistre ce fichier sous `compose.yaml`, puis lance `docker compose up -d`. Ouvre ensuite http://localhost:8080. Les versions récentes de Compose n'exigent généralement plus la clé supérieure `version`.</p>
+          </div>
+        </section>
+
+        <section id="depannage" class="section-anchor mb-12">
+          <div class="mb-5"><div class="text-xs uppercase tracking-widest text-rose-300 font-bold">08 · Dépannage</div><h2 class="text-2xl font-extrabold text-white mt-1">Problèmes fréquents</h2></div>
+          <div class="space-y-3">
+            <details class="surface rounded-xl p-4 group"><summary class="cursor-pointer font-semibold text-white">Un conteneur ne démarre pas</summary><p class="text-sm text-slate-400 mt-3">Consulte ses logs avec `docker compose logs -f NOM_SERVICE`, puis vérifie les variables d'environnement, les ports, les dépendances et la configuration avec `docker compose config`.</p></details>
+            <details class="surface rounded-xl p-4 group"><summary class="cursor-pointer font-semibold text-white">Un port est déjà utilisé</summary><p class="text-sm text-slate-400 mt-3">Modifie le port côté hôte dans la section `ports` du fichier Compose, ou identifie le programme qui utilise déjà ce port. Exemple : `"8081:80"`.</p></details>
+            <details class="surface rounded-xl p-4 group"><summary class="cursor-pointer font-semibold text-white">Les changements du Dockerfile ne sont pas pris en compte</summary><p class="text-sm text-slate-400 mt-3">Reconstruis l'image avec `docker compose build NOM_SERVICE`, puis recrée le service avec `docker compose up -d --force-recreate NOM_SERVICE`.</p></details>
+            <details class="surface rounded-xl p-4 group"><summary class="cursor-pointer font-semibold text-white">La base de données semble avoir perdu ses données</summary><p class="text-sm text-slate-400 mt-3">Vérifie que le service utilise bien un volume persistant. Évite `docker compose down -v` si tu veux conserver les données.</p></details>
+            <details class="surface rounded-xl p-4 group"><summary class="cursor-pointer font-semibold text-white">La commande ne trouve pas le fichier Compose</summary><p class="text-sm text-slate-400 mt-3">Place-toi dans le bon dossier ou indique le fichier explicitement : `docker compose -f chemin/compose.yaml up -d`.</p></details>
+          </div>
+        </section>
+
+        <section class="surface rounded-2xl p-6 sm:p-8">
+          <div class="flex gap-4">
+            <div class="text-3xl">💡</div>
+            <div><h2 class="text-lg font-extrabold text-white">Conseil de sécurité</h2><p class="text-sm text-slate-400 mt-2 leading-relaxed">Avant une commande destructive, vérifie le projet et les volumes concernés. En particulier, `down -v` supprime les volumes gérés par Compose et peut effacer une base de données. Pour les projets importants, configure des sauvegardes régulières.</p></div>
+          </div>
+        </section>
       </div>
     </div>
-  </section>
+  </main>
 
-  <!-- NOTE -->
-  <div class="border border-amber-500/20 bg-amber-500/5 rounded-2xl p-6 mb-12">
-    <div class="flex gap-3">
-      <span class="text-2xl">💡</span>
-      <div>
-        <h4 class="font-bold text-amber-300">Conseil important</h4>
-        <p class="text-sm text-slate-400 mt-2 leading-relaxed">
-          La commande <code class="text-amber-300">docker compose down -v</code>
-          supprime également les volumes déclarés dans le projet. Attention :
-          cela peut entraîner la perte des données persistées, notamment celles d'une base PostgreSQL.
-        </p>
-      </div>
+  <footer class="border-t border-slate-800 bg-[#060a13]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row justify-between gap-3">
+      <div><div class="font-extrabold text-white">🐳 Docker Compose Guide</div><p class="text-xs text-slate-500 mt-1">Apprendre · Pratiquer · Maîtriser</p></div>
+      <p class="text-xs text-slate-500">Guide de référence — vérifie les options selon ta version de Docker Compose.</p>
     </div>
-  </div>
+  </footer>
 
-</main>
+  <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 translate-y-20 opacity-0 pointer-events-none transition-all duration-300 rounded-xl border border-emerald-400/20 bg-slate-900 px-4 py-3 text-sm text-emerald-300 shadow-2xl" role="status">Commande copiée !</div>
 
-<!-- FOOTER -->
-<footer class="border-t border-slate-800 bg-[#060b16]">
-  <div class="max-w-7xl mx-auto px-6 py-9 flex flex-col md:flex-row justify-between gap-4">
-    <div>
-      <h3 class="font-extrabold text-white">🐳 Docker Compose Guide</h3>
-      <p class="text-sm text-slate-500 mt-2">Apprendre • Pratiquer • Maîtriser</p>
-    </div>
-    <p class="text-sm text-slate-500">Guide pratique Docker Compose • 2026</p>
-  </div>
-</footer>
+  <script>
+    const searchInput = document.getElementById("searchInput");
+    const cards = [...document.querySelectorAll(".command-card")];
+    const filterButtons = [...document.querySelectorAll(".filter-btn")];
+    const resultCount = document.getElementById("resultCount");
+    const toast = document.getElementById("toast");
+    let activeFilter = "all";
+    let toastTimer;
 
-<!-- SCRIPT COPIER -->
-<script>
-  function copyCode(button) {
-    const container = button.closest('.command') || button.closest('.rounded-2xl');
-    const code = container?.querySelector('code');
+    function updateCards() {
+      const query = searchInput.value.trim().toLowerCase();
+      let visible = 0;
+      cards.forEach(card => {
+        const categoryMatch = activeFilter === "all" || card.dataset.category === activeFilter;
+        const searchable = (card.innerText + " " + (card.dataset.search || "")).toLowerCase();
+        const queryMatch = !query || searchable.includes(query);
+        const show = categoryMatch && queryMatch;
+        card.classList.toggle("hidden", !show);
+        if (show) visible++;
+      });
+      resultCount.textContent = `${visible} commande${visible === 1 ? "" : "s"} affichée${visible === 1 ? "" : "s"}`;
+    }
 
-    if (!code) return;
-
-    const text = code.innerText.trim();
-
-    navigator.clipboard.writeText(text).then(() => {
-      const original = button.innerText;
-      button.innerText = '✓ Copié !';
-      button.classList.add('text-green-400');
-
-      setTimeout(() => {
-        button.innerText = original;
-        button.classList.remove('text-green-400');
-      }, 1500);
-    }).catch(() => {
-      alert('Impossible de copier automatiquement. Sélectionne la commande manuellement.');
+    searchInput.addEventListener("input", updateCards);
+    filterButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        activeFilter = button.dataset.filter;
+        filterButtons.forEach(item => {
+          item.classList.remove("bg-blue-600", "text-white");
+          item.classList.add("border", "border-slate-700", "text-slate-300");
+        });
+        button.classList.add("bg-blue-600", "text-white");
+        button.classList.remove("border", "border-slate-700", "text-slate-300");
+        updateCards();
+      });
     });
-  }
-</script>
 
+    async function copyText(text, button) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const area = document.createElement("textarea");
+          area.value = text;
+          area.style.position = "fixed";
+          area.style.opacity = "0";
+          document.body.appendChild(area);
+          area.select();
+          const ok = document.execCommand("copy");
+          area.remove();
+          if (!ok) throw new Error("Copie impossible");
+        }
+        if (button) {
+          const previous = button.textContent;
+          button.textContent = "✓ Copié";
+          button.classList.add("copied");
+          setTimeout(() => { button.textContent = previous; button.classList.remove("copied"); }, 1400);
+        }
+        toast.classList.remove("translate-y-20", "opacity-0");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.add("translate-y-20", "opacity-0"), 1600);
+      } catch (error) {
+        alert("La copie automatique a échoué. Sélectionne la commande et copie-la manuellement.");
+      }
+    }
+
+    document.querySelectorAll("[data-copy]").forEach(button => {
+      button.addEventListener("click", () => copyText(button.dataset.copy, button));
+    });
+
+    const sections = [...document.querySelectorAll(".section-anchor[id]")];
+    const navLinks = [...document.querySelectorAll("#sideNav a")];
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            navLinks.forEach(link => link.classList.toggle("active", link.getAttribute("href") === "#" + entry.target.id));
+          }
+        });
+      }, { rootMargin: "-20% 0px -70% 0px" });
+      sections.forEach(section => observer.observe(section));
+    }
+    updateCards();
+  </script>
 </body>
 </html>
